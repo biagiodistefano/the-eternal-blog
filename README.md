@@ -52,7 +52,7 @@ the total Karma existing at the moment of the beginning of the new election.
 
 #### The Authors
 Each Fresh Author will have **10 invitations** each; but when they invite another Author,
-tha latter will have **9 invitations**. The first Author will now have **0 invitations**.
+the latter will have **9 invitations**. The first Author will now have **0 invitations**.
 
 Example:
 - The `King` invites `A`. `A` has `10 invites` to use.
@@ -75,7 +75,7 @@ Each Author will start with 0 Karma. Karma is increased or decreased by getting 
 or downvotes on the Authors' posts. Karma can also be negative.
 
 Karma can be bought at `karmaPrice()`. The price is determined by the Authors.
-The ether spent to buy Karma goes to the balance of the contract and can be withdrawn
+The Ether spent to buy Karma goes to the balance of the contract and can be withdrawn
 by Authors by spending their `shares`.
 
 #### Shares
@@ -99,8 +99,8 @@ Each Author will be able to write **21 posts**. Each post can be `upvoted`, `dow
 In order to prevent abuse, **Authors from the same chain of invitation, cannot upvote
 each other's posts**, but they can downvote and flag them (to enforce moderation).
 
-Upvoting or downvoting post increases or decreases its `Score`, the Author's and
-total `Karma` and `Shares`.
+Upvoting or downvoting posts increases or decreases their `score`, the Author's `karma`, `shares`
+and the `totalKarma` and `totalShares`.
 
 **If a Post gets flagged `flagsToPostDeletion()` times, it gets deleted**.
 
@@ -115,9 +115,6 @@ An Author can buy Karma for Ether at `karmaPrice()` that goes into the contract'
 in voting mechanisms**.
 
 Karma price is set by the Authors.
-
-#### Withdrawing Ether
-Each Author can withdraw Ether proportionally to his/her Karma (net of purchased Karma). To prevent **double-withdrawing**, the Karma gained through upvotes will be mirrored to the `shares` field of each Author. **When an author withdraws, he/she spends his/her shares**.
 
 ## Moderation
 
