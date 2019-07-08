@@ -64,8 +64,8 @@ they want. If no limits are applied, e.g. not zeroing the invitations after one 
 anyone could control up to _10!_ Author-addresses, thus compromising the governance.
 
 In the previous example, `A`, `B` and `C` belong to the same invitation
-chain, thus they cannot upvote eachother's posts, nor can they vote
-eachothers for Kingship.
+chain, thus they cannot upvote each other's posts, nor can they vote
+each other for Kingship.
 
 Each Author will be entitled to write **21 posts**. After those are spent, Authors will
 be able to post by spending `10 Karma`.
@@ -97,7 +97,7 @@ Each Author will be able to write **21 posts**. Each post can be `upvoted`, `dow
 
 #### Voting and flagging Posts.
 In order to prevent abuse, **Authors from the same chain of invitation, cannot upvote
-eachothers' posts**, but they can downvote and flag them (to enforce moderation).
+each other's posts**, but they can downvote and flag them (to enforce moderation).
 
 Upvoting or downvoting post increases or decreases its `Score`, the Author's and
 total `Karma` and `Shares`.
