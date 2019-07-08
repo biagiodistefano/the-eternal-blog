@@ -81,6 +81,7 @@ contract TheEternalBlog {
     event NewKnight(address author);
     event RemovedKnight(address author);
     event NewAuthor(address author, address invitedBy);
+    event AuthorBanned(address author);
     event NewPost(uint256 postId, address author);
     event PostDeleted(uint256 postId);
     event PostDownvoted(uint256 postId, address downvotedBy);
@@ -190,6 +191,7 @@ contract TheEternalBlog {
             totalShares -= authors[_author].shares;
         }
         delete authors[_author];
+        emit AuthorBanned(_author);
     }
     
     function newPost(bytes32 _postTitle, bytes32 _digest, uint8 _hashFunction, uint8 _size) public onlyAuthors {
