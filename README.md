@@ -17,7 +17,7 @@ being the unstoppable publishing of illegal content such as child pornography.
 The proposed architectures finds its roots in a Karma-based system similar to Reddit's,
 but with some key differences.
 
-## Governing highlights
+### Governing highlights
 
 The power of governing belongs to the Authors.
 
