@@ -4,7 +4,7 @@ contract TheEternalBlog {
     
     address public king;
     int256 totalKarma;
-    uint256 totalShares;
+    int256 totalShares;
     
     mapping (uint8 => uint256) public authorVotedValues;
     mapping (uint8 => uint256) authorVoteCount;
@@ -64,6 +64,7 @@ contract TheEternalBlog {
     }
     
     mapping(address => Author) public authors;
+    mapping(address => bool) public bannedAuthors;
     mapping(uint256 => Post) public posts;
     mapping(uint256 => address) public postIdToAuthor;
     mapping(address => bool) public knights;
@@ -122,6 +123,7 @@ contract TheEternalBlog {
     }
     
     function newAuthor(address payable _address) public onlyKing {
+        require(!authors[_address].isAuthor && !bannedAuthors[_address]);
         Author memory author;
         author._address = _address;
         author.invitationRoot = _address;
@@ -129,8 +131,6 @@ contract TheEternalBlog {
         author.isAuthor = true;
         author.invitationsLeft = 10;
         author.postsLeft = 21;
-        uint256 id = authorsIndex.push(_address)-1;
-        author.id = id;
         authors[_address] = author;
         emit FreshAuthor(_address, msg.sender);
     }
@@ -160,7 +160,7 @@ contract TheEternalBlog {
     }
     
     function inviteAuthor(address payable _address) public canInvite {
-        require(_address != msg.sender);
+        require(_address != msg.sender && !bannedAuthors[_address]);
         Author memory author;
         author._address = _address;
         author.invitationRoot = authors[msg.sender].invitationRoot;
@@ -176,12 +176,19 @@ contract TheEternalBlog {
         emit NewAuthor(_address, msg.sender);
     }
     
-    function deleteAuthor(address _author) internal {
+    function banAuthor(address _author) internal {
         uint rowToDelete = authors[_author].index;
         address idToMove = authorsIndex[authorsIndex.length-1];
         authorsIndex[rowToDelete] = idToMove;
         authors[idToMove].index = rowToDelete;
         authorsIndex.length--;
+        bannedAuthors[_author] = true;
+        if (authors[_author].karma > 0) {
+            totalKarma -= authors[_author].karma;
+        }
+        if (authors[_author].shares > 0) {
+            totalShares -= authors[_author].shares;
+        }
         delete authors[_author];
     }
     
@@ -274,16 +281,16 @@ contract TheEternalBlog {
         authors[posts[_postId].author].flagsReceived += downvotes;
         totalKarma -= int256(downvotes);
         if (authors[posts[_postId].author].shares - int256(downvotes) >= 0) {
-            totalShares -= downvotes;
-        } else {
-            totalShares -= uint256(authors[posts[_postId].author].shares);
+            totalShares -= int(downvotes);
+        } else if (authors[posts[_postId].author].shares > 0) {
+            totalShares -= authors[posts[_postId].author].shares;
         }
         authors[posts[_postId].author].shares -= int256(downvotes);
         if (posts[_postId].flagsReceived <= flagsToPostDeletion()) {
             deletePost(_postId);
         }
-        if (authors[posts[_postId].author].flagsReceived <= flagsToAuthorDeletion()) {
-            deleteAuthor(posts[_postId].author);
+        if (authors[posts[_postId].author].flagsReceived <= flagsToAuthorBan()) {
+            banAuthor(posts[_postId].author);
         }
     }
     
@@ -306,15 +313,15 @@ contract TheEternalBlog {
     }
     
     function withdrawEther(int256 _sharesToUse) public canWithdraw(_sharesToUse) {
-        uint256 amount = uint256(authors[msg.sender].shares) * address(this).balance / totalShares;
+        int256 amount = authors[msg.sender].shares * int256(address(this).balance / uint256(totalShares));
         authors[msg.sender].shares -= _sharesToUse;
-        totalShares -= uint256(_sharesToUse);
-        msg.sender.transfer(amount);
+        totalShares -= _sharesToUse;
+        msg.sender.transfer(uint256(amount));
     }
     
     function dethrone(address _addressToVote) public onlyAuthors {
         require(dethroningAttempts[currentDethroning].open);
-        require(authors[msg.sender].isAuthor && authors[msg.sender].karma > 0);
+        require(authors[msg.sender].isAuthor && authors[msg.sender].karma - authors[msg.sender].purchasedKarma > 0);
         require(authors[_addressToVote].isAuthor);
         require(authors[msg.sender].invitationRoot != authors[_addressToVote].invitationRoot);
         require(dethroningAttempts[currentDethroning].start < 1 weeks);
@@ -323,7 +330,7 @@ contract TheEternalBlog {
             dethroningAttempts[currentDethroning].candidatesIndex.push(_addressToVote);
             dethroningAttempts[currentDethroning].candidatesCount++;
         }
-        dethroningAttempts[currentDethroning].candidates[_addressToVote] += authors[msg.sender].karma;
+        dethroningAttempts[currentDethroning].candidates[_addressToVote] += authors[msg.sender].karma - authors[msg.sender].purchasedKarma;
         if (dethroningAttempts[currentDethroning].candidates[_addressToVote] > dethroningAttempts[currentDethroning].totalDTKarma/2) {
             king = _addressToVote;
             dethroningAttempts[currentDethroning].open = false;
@@ -348,7 +355,7 @@ contract TheEternalBlog {
         return authorVotedValues[1];
     }
     
-    function flagsToAuthorDeletion() public view returns(uint256 value) {
+    function flagsToAuthorBan() public view returns(uint256 value) {
         return authorVotedValues[2];
     }
     
